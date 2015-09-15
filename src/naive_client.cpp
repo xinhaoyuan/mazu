@@ -17,6 +17,7 @@ void LocalClient::RegisterExternalProxyFactory(const std::string &name, IExterna
 
 void LocalClient::CreateFunnel(const std::string &name, const std::string &reducer, const std::string &param) {
     auto funnel = new LocalFunnel();
+    funnel->name = name;
     funnel->factory = _reducerFactories[reducer];
     funnel->factory_param = param;
     _funnels[name] = funnel;
@@ -34,7 +35,7 @@ void LocalClient::CreateStream(const std::string &name, const std::string &mappe
     auto agent = CreateMapperAgent(target);
     auto funnel = _funnels[source];
     auto mapper = _mapperFactories[mapperType]->Create(param, agent);
-    funnel->subscriptions[name] = mapper;  
+    funnel->subscriptions[name] = mapper;
 }
 
 IMapperAgent *LocalClient::CreateMapperAgent(const std::string &target) {
@@ -83,12 +84,19 @@ void LocalExternalProxyAgent::Send(const std::string &key, int epoch, void *blob
     reducer->OnRecieve(epoch, blob, length);
 }
 
+void LocalExternalProxyAgent::OnClose() {
+}
+
 void LocalExternalProxyAgent::OnEpochComplete(int epoch) {
 }
 
 LocalReducerAgent::LocalReducerAgent(LocalFunnel *funnel, const std::string &key) {
     _funnel = funnel;
     _key = key;
+}
+
+const std::string &LocalReducerAgent::GetKey() {
+    return _key;
 }
 
 void LocalReducerAgent::Send(int epoch, void *blob, size_t length) {

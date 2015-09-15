@@ -7,6 +7,7 @@ namespace mazu { namespace client {
 
         class IReducerAgent {
         public:
+            virtual const std::string &GetKey() = 0;
             virtual void Send(int epoch, void *blob, size_t length) = 0;
             virtual void NotifyOn(int epoch) = 0;
         };
@@ -41,6 +42,7 @@ namespace mazu { namespace client {
         public:
             virtual void Send(const std::string &key, int epoch, void *blob, size_t length) = 0;
             virtual void OnEpochComplete(int epoch) = 0;
+            virtual void OnClose() = 0;
         };
 
         class IExternalProxy {

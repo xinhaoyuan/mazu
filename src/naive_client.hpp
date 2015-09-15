@@ -9,6 +9,7 @@ namespace mazu { namespace client {
 
         class LocalFunnel {
         public:
+            std::string      name;
             IReducerFactory *factory;
             std::string      factory_param; 
             std::map<std::string, IMapper *> subscriptions;
@@ -29,15 +30,16 @@ namespace mazu { namespace client {
             LocalExternalProxyAgent(LocalFunnel *target);
             virtual void Send(const std::string &key, int epoch, void *blob, size_t length);
             virtual void OnEpochComplete(int epoch);
+            virtual void OnClose();
             
         private:
             LocalFunnel *_target;
         };
 
-
         class LocalReducerAgent : public IReducerAgent {
         public:
             LocalReducerAgent(LocalFunnel *funnel, const std::string &key);
+            virtual const std::string &GetKey();
             virtual void Send(int epoch, void *blob, size_t length);
             virtual void NotifyOn(int epoch);
 
