@@ -11,8 +11,8 @@ void LocalClient::RegisterReducerFactory(const std::string &name, IReducerFactor
     _reducerFactories[name] = factory;
 }
 
-void LocalClient::RegisterExternalSourceFactory(const std::string &name, IExternalSourceFactory *factory) {
-    _externalSourceFactories[name] = factory;
+void LocalClient::RegisterExternalSourceProxyFactory(const std::string &name, IExternalSourceProxyFactory *factory) {
+    _externalSourceProxyFactories[name] = factory;
 }
 
 void LocalClient::CreateFunnel(const std::string &name, const std::string &reducer, const std::string &param) {
@@ -25,23 +25,23 @@ void LocalClient::CreateExternalSource(const std::string &name,
                                        const std::string &externalSource, const std::string &param,
                                        const std::string &target) {
     auto agent = CreateExternalSourceMapperAgent(target);
-    auto es = _externalSourceFactories[externalSource].Create(agent, 0);
+    auto es = _externalSourceProxyFactories[externalSource]->Create(agent, 0);
     _externalSources[name] = es;
 }
 
-void LocalClient::CreateStream(const std::string &name, const std::string &mapper, const std::string &param, const std::string &source, const std::string &target) {
+void LocalClient::CreateStream(const std::string &name, const std::string &mapperType, const std::string &param, const std::string &source, const std::string &target) {
     auto agent = CreateMapperAgent(target);
     auto funnel = _funnels[source];
-    auto mapper = _mapperFactories[mapper].Create(agent);
+    auto mapper = _mapperFactories[mapperType]->Create(agent);
     funnel->subscriptions[name] = mapper;  
 }
 
 IMapperAgent *LocalClient::CreateMapperAgent(const std::string &target) {
-    return new LocalMapper(_funnels[target]);
+    return new LocalMapperAgent(_funnels[target]);
 }
 
 IMapperAgent *LocalClient::CreateExternalSourceMapperAgent(const std::string &target) {
-    return new LocalMapper(_funnels[target]);
+    return new LocalMapperAgent(_funnels[target]);
 }
 
 LocalMapperAgent::LocalMapperAgent(LocalFunnel *target) {
@@ -52,7 +52,7 @@ void LocalMapperAgent::Send(const std::string &key, int epoch, void *blob, size_
     auto it = _target->reducers.find(key);
     IReducer *reducer;
     if (it == _target->reducers.end()) {
-        IReducerAgent *agent = new LocalReducerAgent(this, key);
+        IReducerAgent *agent = new LocalReducerAgent(_target, key);
         _target->reducers[key] = _target->factory->Create(agent, key);
         reducer = _target->reducers[key];
     }
@@ -60,7 +60,7 @@ void LocalMapperAgent::Send(const std::string &key, int epoch, void *blob, size_
         reducer = _target->reducers[key];
     }
 
-    _reducer->OnRecieve(epoch, blob, length);
+    reducer->OnRecieve(epoch, blob, length);
 }
 
 LocalReducerAgent::LocalReducerAgent(LocalFunnel *funnel, const std::string &key) {
@@ -70,7 +70,7 @@ LocalReducerAgent::LocalReducerAgent(LocalFunnel *funnel, const std::string &key
 
 void LocalReducerAgent::Send(int epoch, void *blob, size_t length) {
     for (auto it : _funnel->subscriptions) {
-        IMapper *mapper = it->second;
+        IMapper *mapper = it.second;
         mapper->OnRecieve(_key, epoch, blob, length);
     }
 }

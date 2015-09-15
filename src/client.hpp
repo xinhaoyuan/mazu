@@ -17,7 +17,7 @@ namespace mazu { namespace client {
         class LocalMapperAgent : public IMapperAgent {
         public:
             LocalMapperAgent(LocalFunnel *target);
-            virtual Send(const std::string &key, int epoch, void *blob, size_t length);
+            virtual void Send(const std::string &key, int epoch, void *blob, size_t length);
             
         private:
             LocalFunnel *_target;
@@ -38,9 +38,9 @@ namespace mazu { namespace client {
         public:
             void RegisterMapperFactory(const std::string &name, IMapperFactory *factory);
             void RegisterReducerFactory(const std::string &name, IReducerFactory *factory);
-            void RegisterExternalSourceFactory(const std::string &name, IExternalSourceFactory *factory);
+            void RegisterExternalSourceProxyFactory(const std::string &name, IExternalSourceProxyFactory *factory);
             
-            virtual void CreateFunnel(const std::string &name, const std::string &reducer const std::string &param);
+            virtual void CreateFunnel(const std::string &name, const std::string &reducer, const std::string &param);
             virtual void CreateExternalSource(const std::string &name, const std::string &externalSource, const std::string &param, const std::string &target);
             virtual void CreateStream(const std::string &name, const std::string &mapper, const std::string &param, const std::string &source, const std::string &target);
 
@@ -50,7 +50,7 @@ namespace mazu { namespace client {
 
             std::map<std::string, IMapperFactory *> _mapperFactories;
             std::map<std::string, IReducerFactory *> _reducerFactories;
-            std::map<std::string, IExternalSourceFactory *> _externalSourceFactories;
+            std::map<std::string, IExternalSourceProxyFactory *> _externalSourceProxyFactories;
             
             std::map<std::string, LocalFunnel *> _funnels;
             std::map<std::string, IExternalSourceProxy *> _externalSources;
