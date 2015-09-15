@@ -1,4 +1,4 @@
-#include "local_client.hpp"
+#include "naive_client.hpp"
 #include <iostream>
 
 using namespace std;

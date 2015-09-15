@@ -1,4 +1,4 @@
-#include "local_client.hpp"
+#include "naive_client.hpp"
 
 using namespace std;
 using namespace mazu::client;
@@ -11,8 +11,8 @@ void LocalClient::RegisterReducerFactory(const std::string &name, IReducerFactor
     _reducerFactories[name] = factory;
 }
 
-void LocalClient::RegisterExternalSourceProxyFactory(const std::string &name, IExternalSourceProxyFactory *factory) {
-    _externalSourceProxyFactories[name] = factory;
+void LocalClient::RegisterExternalProxyFactory(const std::string &name, IExternalProxyFactory *factory) {
+    _externalProxyFactories[name] = factory;
 }
 
 void LocalClient::CreateFunnel(const std::string &name, const std::string &reducer, const std::string &param) {
@@ -23,11 +23,11 @@ void LocalClient::CreateFunnel(const std::string &name, const std::string &reduc
 }
 
 void LocalClient::CreateExternalSource(const std::string &name,
-                                       const std::string &externalSource, const std::string &param,
+                                       const std::string &externalProxy, const std::string &param,
                                        const std::string &target) {
-    auto agent = CreateExternalSourceMapperAgent(target);
-    auto es = _externalSourceProxyFactories[externalSource]->Create(param, agent, 0);
-    _externalSources[name] = es;
+    auto agent = CreateExternalProxyAgent(target);
+    auto es = _externalProxyFactories[externalProxy]->Create(param, agent, 0);
+    _externalProxies[name] = es;
 }
 
 void LocalClient::CreateStream(const std::string &name, const std::string &mapperType, const std::string &param, const std::string &source, const std::string &target) {
@@ -41,8 +41,8 @@ IMapperAgent *LocalClient::CreateMapperAgent(const std::string &target) {
     return new LocalMapperAgent(_funnels[target]);
 }
 
-IMapperAgent *LocalClient::CreateExternalSourceMapperAgent(const std::string &target) {
-    return new LocalMapperAgent(_funnels[target]);
+IExternalProxyAgent *LocalClient::CreateExternalProxyAgent(const std::string &target) {
+    return new LocalExternalProxyAgent(_funnels[target]);
 }
 
 LocalMapperAgent::LocalMapperAgent(LocalFunnel *target) {
@@ -62,6 +62,28 @@ void LocalMapperAgent::Send(const std::string &key, int epoch, void *blob, size_
     }
 
     reducer->OnRecieve(epoch, blob, length);
+}
+
+LocalExternalProxyAgent::LocalExternalProxyAgent(LocalFunnel *target) {
+    _target = target;
+}
+
+void LocalExternalProxyAgent::Send(const std::string &key, int epoch, void *blob, size_t length) {
+    auto it = _target->reducers.find(key);
+    IReducer *reducer;
+    if (it == _target->reducers.end()) {
+        IReducerAgent *agent = new LocalReducerAgent(_target, key);
+        _target->reducers[key] = _target->factory->Create(_target->factory_param, agent, key);
+        reducer = _target->reducers[key];
+    }
+    else {
+        reducer = _target->reducers[key];
+    }
+
+    reducer->OnRecieve(epoch, blob, length);
+}
+
+void LocalExternalProxyAgent::OnEpochComplete(int epoch) {
 }
 
 LocalReducerAgent::LocalReducerAgent(LocalFunnel *funnel, const std::string &key) {

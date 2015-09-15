@@ -37,19 +37,25 @@ namespace mazu { namespace client {
             virtual IMapper *Create(const std::string &param, IMapperAgent *agent) = 0;
         };
 
-        class IExternalSourceProxy {
+        class IExternalProxyAgent {
+        public:
+            virtual void Send(const std::string &key, int epoch, void *blob, size_t length) = 0;
+            virtual void OnEpochComplete(int epoch) = 0;
+        };
+
+        class IExternalProxy {
         public:
         };
 
-        class IExternalSourceProxyFactory {
+        class IExternalProxyFactory {
         public:
-            virtual IExternalSourceProxy *Create(const std::string &param, IMapperAgent *agent, int epoch) = 0; 
+            virtual IExternalProxy *Create(const std::string &param, IExternalProxyAgent *agent, int epoch) = 0; 
         };
 
         class IClient {
         public:
             virtual void CreateFunnel(const std::string &name, const std::string &reducer, const std::string &param) = 0;
-            virtual void CreateExternalSource(const std::string &name, const std::string &externalSource, const std::string &param, const std::string &target) = 0;
+            virtual void CreateExternalSource(const std::string &name, const std::string &externalProxy, const std::string &param, const std::string &target) = 0;
             virtual void CreateStream(const std::string &name, const std::string &mapper, const std::string &param, const std::string &source, const std::string &target) = 0;
         };
         
