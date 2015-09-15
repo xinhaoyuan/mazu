@@ -1,4 +1,4 @@
-#include "client.hpp"
+#include "local_client.hpp"
 
 using namespace std;
 using namespace mazu::client;
@@ -18,6 +18,7 @@ void LocalClient::RegisterExternalSourceProxyFactory(const std::string &name, IE
 void LocalClient::CreateFunnel(const std::string &name, const std::string &reducer, const std::string &param) {
     auto funnel = new LocalFunnel();
     funnel->factory = _reducerFactories[reducer];
+    funnel->factory_param = param;
     _funnels[name] = funnel;
 }
 
@@ -25,14 +26,14 @@ void LocalClient::CreateExternalSource(const std::string &name,
                                        const std::string &externalSource, const std::string &param,
                                        const std::string &target) {
     auto agent = CreateExternalSourceMapperAgent(target);
-    auto es = _externalSourceProxyFactories[externalSource]->Create(agent, 0);
+    auto es = _externalSourceProxyFactories[externalSource]->Create(param, agent, 0);
     _externalSources[name] = es;
 }
 
 void LocalClient::CreateStream(const std::string &name, const std::string &mapperType, const std::string &param, const std::string &source, const std::string &target) {
     auto agent = CreateMapperAgent(target);
     auto funnel = _funnels[source];
-    auto mapper = _mapperFactories[mapperType]->Create(agent);
+    auto mapper = _mapperFactories[mapperType]->Create(param, agent);
     funnel->subscriptions[name] = mapper;  
 }
 
@@ -53,7 +54,7 @@ void LocalMapperAgent::Send(const std::string &key, int epoch, void *blob, size_
     IReducer *reducer;
     if (it == _target->reducers.end()) {
         IReducerAgent *agent = new LocalReducerAgent(_target, key);
-        _target->reducers[key] = _target->factory->Create(agent, key);
+        _target->reducers[key] = _target->factory->Create(_target->factory_param, agent, key);
         reducer = _target->reducers[key];
     }
     else {

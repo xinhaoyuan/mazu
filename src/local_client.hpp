@@ -10,6 +10,7 @@ namespace mazu { namespace client {
         class LocalFunnel {
         public:
             IReducerFactory *factory;
+            std::string      factory_param; 
             std::map<std::string, IMapper *> subscriptions;
             std::map<std::string, IReducer *> reducers;
         };

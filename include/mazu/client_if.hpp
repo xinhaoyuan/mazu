@@ -19,7 +19,7 @@ namespace mazu { namespace client {
 
         class IReducerFactory {
         public:
-            virtual IReducer *Create(IReducerAgent *agent, const std::string &key) = 0;
+            virtual IReducer *Create(const std::string &param, IReducerAgent *agent, const std::string &key) = 0;
         };
 
         class IMapperAgent {
@@ -34,7 +34,7 @@ namespace mazu { namespace client {
 
         class IMapperFactory {
         public:
-            virtual IMapper *Create(IMapperAgent *agent) = 0;
+            virtual IMapper *Create(const std::string &param, IMapperAgent *agent) = 0;
         };
 
         class IExternalSourceProxy {
@@ -43,7 +43,7 @@ namespace mazu { namespace client {
 
         class IExternalSourceProxyFactory {
         public:
-            virtual IExternalSourceProxy *Create(IMapperAgent *agent, int epoch) = 0; 
+            virtual IExternalSourceProxy *Create(const std::string &param, IMapperAgent *agent, int epoch) = 0; 
         };
 
         class IClient {
