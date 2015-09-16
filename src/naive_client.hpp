@@ -28,12 +28,14 @@ namespace mazu { namespace client {
         class LocalExternalProxyAgent : public IExternalProxyAgent {
         public:
             LocalExternalProxyAgent(LocalFunnel *target);
+            virtual void Connect(IExternalProxy *proxy);
             virtual void Send(const std::string &key, int epoch, void *blob, size_t length);
             virtual void OnEpochComplete(int epoch);
-            virtual void OnClose(IExternalProxy *self);
+            virtual void OnClose();
             
         private:
             LocalFunnel *_target;
+            IExternalProxy *_proxy;
         };
 
         class LocalReducerAgent : public IReducerAgent {

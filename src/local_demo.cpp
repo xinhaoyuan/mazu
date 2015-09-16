@@ -104,7 +104,11 @@ public:
     FileSystemSource(IExternalProxyAgent *agent, const string &path) {
         _agent = agent;
         _path = path;
-        _proxyThread = new thread(&FileSystemSource::ThreadEntry, this);        
+        _proxyThread = NULL;
+    }
+
+    virtual void Start(int epoch) {
+        _proxyThread = new thread(&FileSystemSource::ThreadEntry, this);
     }
 
     void ThreadEntry() {
@@ -116,11 +120,10 @@ public:
             _agent->Send("singleton_key", 0, (void *)line.c_str(), line.length());
         }
         cout << "ended reading line" << endl;
-        _agent->OnClose(this);
+        _agent->OnClose();
     }
 
-    virtual ~FileSystemSource() {
-        cout << "Closing" << endl;
+    virtual void Dispose() {
         _proxyThread->join();
     }
 

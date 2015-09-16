@@ -16,6 +16,7 @@ namespace mazu { namespace client {
         public:            
             virtual void OnRecieve(int epoch, void *blob, size_t length) = 0;
             virtual void OnNotify(int epoch) = 0;
+            virtual ~IReducer() {}
         };
 
         class IReducerFactory {
@@ -31,6 +32,7 @@ namespace mazu { namespace client {
         class IMapper {
         public:
             virtual void OnRecieve(const std::string &key, int epoch, void *blob, size_t length) = 0;
+            virtual ~IMapper() {}
         };
 
         class IMapperFactory {
@@ -42,14 +44,17 @@ namespace mazu { namespace client {
         
         class IExternalProxyAgent {
         public:
+            virtual void Connect(IExternalProxy *proxy) = 0;
             virtual void Send(const std::string &key, int epoch, void *blob, size_t length) = 0;
             virtual void OnEpochComplete(int epoch) = 0;
-            virtual void OnClose(IExternalProxy *self) = 0;
+            virtual void OnClose() = 0;
         };
 
         class IExternalProxy {
         public:
-            virtual ~IExternalProxy() { }
+            virtual void Start(int epoch) = 0;
+            virtual void Dispose() = 0;
+            virtual ~IExternalProxy() {}
         };
 
         class IExternalProxyFactory {

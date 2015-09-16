@@ -3,6 +3,8 @@
 using namespace std;
 using namespace mazu::client;
 
+// == LocalClient ==
+
 void LocalClient::RegisterMapperFactory(const std::string &name, IMapperFactory *factory) {
     _mapperFactories[name] = factory;
 }
@@ -28,7 +30,9 @@ void LocalClient::CreateExternalSource(const std::string &name,
                                        const std::string &target) {
     auto agent = CreateExternalProxyAgent(target);
     auto es = _externalProxyFactories[externalProxy]->Create(param, agent, 0);
+    agent->Connect(es);
     _externalProxies[name] = es;
+    es->Start(0);
 }
 
 void LocalClient::CreateStream(const std::string &name, const std::string &mapperType, const std::string &param, const std::string &source, const std::string &target) {
@@ -45,6 +49,8 @@ IMapperAgent *LocalClient::CreateMapperAgent(const std::string &target) {
 IExternalProxyAgent *LocalClient::CreateExternalProxyAgent(const std::string &target) {
     return new LocalExternalProxyAgent(_funnels[target]);
 }
+
+// == LocalMapperAgent ==
 
 LocalMapperAgent::LocalMapperAgent(LocalFunnel *target) {
     _target = target;
@@ -65,8 +71,15 @@ void LocalMapperAgent::Send(const std::string &key, int epoch, void *blob, size_
     reducer->OnRecieve(epoch, blob, length);
 }
 
+// == LocalExternalProxyAgent ==
+
 LocalExternalProxyAgent::LocalExternalProxyAgent(LocalFunnel *target) {
     _target = target;
+    _proxy = NULL;
+}
+
+void LocalExternalProxyAgent::Connect(IExternalProxy *proxy) {
+    _proxy = proxy;
 }
 
 void LocalExternalProxyAgent::Send(const std::string &key, int epoch, void *blob, size_t length) {
@@ -84,11 +97,13 @@ void LocalExternalProxyAgent::Send(const std::string &key, int epoch, void *blob
     reducer->OnRecieve(epoch, blob, length);
 }
 
-void LocalExternalProxyAgent::OnClose(IExternalProxy *proxy) {
+void LocalExternalProxyAgent::OnClose() {
 }
 
 void LocalExternalProxyAgent::OnEpochComplete(int epoch) {
 }
+
+// == LocalReducerAgent ==
 
 LocalReducerAgent::LocalReducerAgent(LocalFunnel *funnel, const std::string &key) {
     _funnel = funnel;
