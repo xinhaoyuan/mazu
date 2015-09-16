@@ -116,10 +116,11 @@ public:
             _agent->Send("singleton_key", 0, (void *)line.c_str(), line.length());
         }
         cout << "ended reading line" << endl;
-        _agent->OnClose();
+        _agent->OnClose(this);
     }
 
-    ~FileSystemSource() {
+    virtual ~FileSystemSource() {
+        cout << "Closing" << endl;
         _proxyThread->join();
     }
 

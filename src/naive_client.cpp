@@ -84,7 +84,7 @@ void LocalExternalProxyAgent::Send(const std::string &key, int epoch, void *blob
     reducer->OnRecieve(epoch, blob, length);
 }
 
-void LocalExternalProxyAgent::OnClose() {
+void LocalExternalProxyAgent::OnClose(IExternalProxy *proxy) {
 }
 
 void LocalExternalProxyAgent::OnEpochComplete(int epoch) {

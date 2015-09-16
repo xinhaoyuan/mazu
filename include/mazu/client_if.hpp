@@ -38,15 +38,18 @@ namespace mazu { namespace client {
             virtual IMapper *Create(const std::string &param, IMapperAgent *agent) = 0;
         };
 
+        class IExternalProxy;
+        
         class IExternalProxyAgent {
         public:
             virtual void Send(const std::string &key, int epoch, void *blob, size_t length) = 0;
             virtual void OnEpochComplete(int epoch) = 0;
-            virtual void OnClose() = 0;
+            virtual void OnClose(IExternalProxy *self) = 0;
         };
 
         class IExternalProxy {
         public:
+            virtual ~IExternalProxy() { }
         };
 
         class IExternalProxyFactory {

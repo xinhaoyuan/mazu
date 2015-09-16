@@ -30,7 +30,7 @@ namespace mazu { namespace client {
             LocalExternalProxyAgent(LocalFunnel *target);
             virtual void Send(const std::string &key, int epoch, void *blob, size_t length);
             virtual void OnEpochComplete(int epoch);
-            virtual void OnClose();
+            virtual void OnClose(IExternalProxy *self);
             
         private:
             LocalFunnel *_target;
