@@ -26,8 +26,8 @@ void LocalMazuAgent::CreateFunnel(const std::string &name, const std::string &re
 }
 
 void LocalMazuAgent::CreateExternalSource(const std::string &name,
-                                       const std::string &externalProxy, const std::string &param,
-                                       const std::string &target) {
+                                          const std::string &externalProxy, const std::string &param,
+                                          const std::string &target) {
     auto agent = CreateExternalProxyAgent(target);
     auto es = _externalProxyFactories[externalProxy]->Create(param, agent, 0);
     agent->Connect(es);
@@ -35,7 +35,9 @@ void LocalMazuAgent::CreateExternalSource(const std::string &name,
     es->Start(0);
 }
 
-void LocalMazuAgent::CreateStream(const std::string &name, const std::string &mapperType, const std::string &param, const std::string &source, const std::string &target) {
+void LocalMazuAgent::CreateStream(const std::string &name,
+                                  const std::string &mapperType, const std::string &param,
+                                  const std::string &source, const std::string &target) {
     auto agent = CreateMapperAgent(target);
     auto funnel = _funnels[source];
     auto mapper = _mapperFactories[mapperType]->Create(param, agent);
