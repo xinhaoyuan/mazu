@@ -142,17 +142,17 @@ public:
 };
 
 int main() {
-    LocalClient client;
+    LocalMazuAgent agent;
     
-    client.RegisterReducerFactory("EchoReducer", new EchoReducerFactory());
-    client.RegisterReducerFactory("InversedPairReducer", new InversedPairReducerFactory());
-    client.RegisterMapperFactory("InversedPairMapper", new InversedPairMapperFactory());
-    client.RegisterExternalProxyFactory("FileSystemSource", new FileSystemSourceFactory());
+    agent.RegisterReducerFactory("EchoReducer", new EchoReducerFactory());
+    agent.RegisterReducerFactory("InversedPairReducer", new InversedPairReducerFactory());
+    agent.RegisterMapperFactory("InversedPairMapper", new InversedPairMapperFactory());
+    agent.RegisterExternalProxyFactory("FileSystemSource", new FileSystemSourceFactory());
 
-    client.CreateFunnel("Input", "EchoReducer", "");
-    client.CreateFunnel("WordCount", "InversedPairReducer", "");
-    client.CreateStream("Mapper", "InversedPairMapper", "", "Input", "WordCount");
-    client.CreateExternalSource("FileSystemInput", "FileSystemSource", "test.input", "Input");
+    agent.CreateFunnel("Input", "EchoReducer", "");
+    agent.CreateFunnel("WordCount", "InversedPairReducer", "");
+    agent.CreateStream("Mapper", "InversedPairMapper", "", "Input", "WordCount");
+    agent.CreateExternalSource("FileSystemInput", "FileSystemSource", "test.input", "Input");
 
     while (1) ;
     return 0;

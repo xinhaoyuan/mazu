@@ -50,7 +50,7 @@ namespace mazu { namespace client {
             LocalFunnel *_funnel;
         };
 
-        class LocalClient : public IClient {
+        class LocalMazuAgent : public IMazuAgent {
         public:
             void RegisterMapperFactory(const std::string &name, IMapperFactory *factory);
             void RegisterReducerFactory(const std::string &name, IReducerFactory *factory);

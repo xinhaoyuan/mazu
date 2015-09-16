@@ -3,21 +3,21 @@
 using namespace std;
 using namespace mazu::client;
 
-// == LocalClient ==
+// == LocalMazuAgent ==
 
-void LocalClient::RegisterMapperFactory(const std::string &name, IMapperFactory *factory) {
+void LocalMazuAgent::RegisterMapperFactory(const std::string &name, IMapperFactory *factory) {
     _mapperFactories[name] = factory;
 }
 
-void LocalClient::RegisterReducerFactory(const std::string &name, IReducerFactory *factory) {
+void LocalMazuAgent::RegisterReducerFactory(const std::string &name, IReducerFactory *factory) {
     _reducerFactories[name] = factory;
 }
 
-void LocalClient::RegisterExternalProxyFactory(const std::string &name, IExternalProxyFactory *factory) {
+void LocalMazuAgent::RegisterExternalProxyFactory(const std::string &name, IExternalProxyFactory *factory) {
     _externalProxyFactories[name] = factory;
 }
 
-void LocalClient::CreateFunnel(const std::string &name, const std::string &reducer, const std::string &param) {
+void LocalMazuAgent::CreateFunnel(const std::string &name, const std::string &reducer, const std::string &param) {
     auto funnel = new LocalFunnel();
     funnel->name = name;
     funnel->factory = _reducerFactories[reducer];
@@ -25,7 +25,7 @@ void LocalClient::CreateFunnel(const std::string &name, const std::string &reduc
     _funnels[name] = funnel;
 }
 
-void LocalClient::CreateExternalSource(const std::string &name,
+void LocalMazuAgent::CreateExternalSource(const std::string &name,
                                        const std::string &externalProxy, const std::string &param,
                                        const std::string &target) {
     auto agent = CreateExternalProxyAgent(target);
@@ -35,18 +35,18 @@ void LocalClient::CreateExternalSource(const std::string &name,
     es->Start(0);
 }
 
-void LocalClient::CreateStream(const std::string &name, const std::string &mapperType, const std::string &param, const std::string &source, const std::string &target) {
+void LocalMazuAgent::CreateStream(const std::string &name, const std::string &mapperType, const std::string &param, const std::string &source, const std::string &target) {
     auto agent = CreateMapperAgent(target);
     auto funnel = _funnels[source];
     auto mapper = _mapperFactories[mapperType]->Create(param, agent);
     funnel->subscriptions[name] = mapper;
 }
 
-IMapperAgent *LocalClient::CreateMapperAgent(const std::string &target) {
+IMapperAgent *LocalMazuAgent::CreateMapperAgent(const std::string &target) {
     return new LocalMapperAgent(_funnels[target]);
 }
 
-IExternalProxyAgent *LocalClient::CreateExternalProxyAgent(const std::string &target) {
+IExternalProxyAgent *LocalMazuAgent::CreateExternalProxyAgent(const std::string &target) {
     return new LocalExternalProxyAgent(_funnels[target]);
 }
 
