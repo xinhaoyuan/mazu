@@ -62,7 +62,7 @@ namespace mazu { namespace client {
             virtual IExternalProxy *Create(const std::string &param, IExternalProxyAgent *agent, int epoch) = 0; 
         };
 
-        class IClient {
+        class IMazuAgent {
         public:
             virtual void CreateFunnel(const std::string &name, const std::string &reducer, const std::string &param) = 0;
             virtual void CreateExternalSource(const std::string &name, const std::string &externalProxy, const std::string &param, const std::string &target) = 0;
